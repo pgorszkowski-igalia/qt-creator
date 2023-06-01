@@ -156,6 +156,7 @@ private:
 
     CursorInfo doFind() const
     {
+        qDebug() << "FindUses::doFind";
         CursorInfo result;
 
         // findLocalUses operates with 1-based line and 0-based column
@@ -242,6 +243,16 @@ private:
 
 bool isSemanticInfoValidExceptLocalUses(const SemanticInfo &semanticInfo, int revision)
 {
+    qDebug() << "isSemanticInfoValidExceptLocalUses "
+             << " semanticInfo.doc: " << semanticInfo.doc
+             << " semanticInfo.revision: " << semanticInfo.revision
+             << " revision: " << revision
+             << " semanticInfo.snapshot.isEmpty(): " << semanticInfo.snapshot.isEmpty()
+        ;
+
+    if (!semanticInfo.doc)
+        qDebug() << "test";
+
     return semanticInfo.doc
         && semanticInfo.revision == static_cast<unsigned>(revision)
         && !semanticInfo.snapshot.isEmpty();
@@ -286,17 +297,23 @@ bool handleMacroCase(const Document::Ptr document,
 
 QFuture<CursorInfo> BuiltinCursorInfo::run(const CursorInfoParams &cursorInfoParams)
 {
+    qDebug() << "BuiltinCursorInfo::run1";
+
     QFuture<CursorInfo> nothing;
 
     const SemanticInfo semanticInfo = cursorInfoParams.semanticInfo;
     const int currentDocumentRevision = cursorInfoParams.textCursor.document()->revision();
-    if (!isSemanticInfoValidExceptLocalUses(semanticInfo, currentDocumentRevision))
+    if (!isSemanticInfoValidExceptLocalUses(semanticInfo, currentDocumentRevision)) {
+        qDebug() << "BuiltinCursorInfo::run11";
         return nothing;
+    }
 
     const Document::Ptr document = semanticInfo.doc;
     const Snapshot snapshot = semanticInfo.snapshot;
-    if (!document)
+    if (!document) {
+        qDebug() << "BuiltinCursorInfo::run12";
         return nothing;
+    }
 
     QTC_ASSERT(document->translationUnit(), return nothing);
     QTC_ASSERT(document->translationUnit()->ast(), return nothing);
@@ -304,6 +321,7 @@ QFuture<CursorInfo> BuiltinCursorInfo::run(const CursorInfoParams &cursorInfoPar
 
     CursorInfo::Ranges ranges;
     if (handleMacroCase(document, cursorInfoParams.textCursor, &ranges)) {
+        qDebug() << "BuiltinCursorInfo::run2";
         CursorInfo result;
         result.useRanges = ranges;
         result.areUseRangesForLocalVariable = false;

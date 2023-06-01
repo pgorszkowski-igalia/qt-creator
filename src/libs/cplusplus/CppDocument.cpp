@@ -264,6 +264,7 @@ Document::Document(const FilePath &filePath)
 
 Document::~Document()
 {
+//    qDebug() << "Document::~Document this: " << this << ", _filePath: " << _filePath;
     delete _translationUnit;
     _translationUnit = nullptr;
     if (_control) {

@@ -77,6 +77,7 @@ public:
             item->setOrder(clipboard->size() - 1 - i);
             items.append(item);
         }
+        qDebug() << "ClipboardAssistProcessor::perform clipboard->size: " << clipboard->size() << ", items.size: " << items.size();
 
         return new GenericProposal(interface()->position(), items);
     }
@@ -84,6 +85,8 @@ public:
 
 IAssistProcessor *ClipboardAssistProvider::createProcessor(const AssistInterface *) const
 {
+    qDebug() << "ClipboardAssistProvider::createProcessor";
+
     return new ClipboardAssistProcessor;
 }
 

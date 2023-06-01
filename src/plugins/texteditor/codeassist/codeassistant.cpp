@@ -113,6 +113,8 @@ CodeAssistantPrivate::CodeAssistantPrivate(CodeAssistant *assistant, TextEditorW
 
 void CodeAssistantPrivate::invoke(AssistKind kind, IAssistProvider *provider)
 {
+    qDebug() << "CodeAssistantPrivate::invoke";
+
     stopAutomaticProposalTimer();
 
     if (isDisplayingProposal() && m_assistKind == kind && !m_proposalWidget->isFragile()) {
@@ -156,6 +158,8 @@ void CodeAssistantPrivate::requestProposal(AssistReason reason,
                                            IAssistProvider *provider,
                                            bool isUpdate)
 {
+    qDebug() << "CodeAssistantPrivate::requestProposal1 reason: " << reason << ", kind: " << kind;
+
     // make sure to cleanup old proposals if we cannot find a new assistant
     Utils::ExecuteOnDestruction earlyReturnContextClear([this] { destroyContext(); });
     if (isWaitingForProposal())
@@ -173,11 +177,13 @@ void CodeAssistantPrivate::requestProposal(AssistReason reason,
             return;
     }
 
+    qDebug() << "CodeAssistantPrivate::requestProposal2";
     std::unique_ptr<AssistInterface> assistInterface =
             m_editorWidget->createAssistInterface(kind, reason);
     if (!assistInterface)
         return;
 
+    qDebug() << "CodeAssistantPrivate::requestProposal3";
     // We got an assist provider and interface so no need to reset the current context anymore
     earlyReturnContextClear.reset({});
 

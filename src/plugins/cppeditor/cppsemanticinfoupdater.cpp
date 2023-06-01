@@ -90,6 +90,8 @@ SemanticInfo SemanticInfoUpdaterPrivate::update(const SemanticInfo::Source &sour
                                                 bool emitSignalWhenFinished,
                                                 FuturizedTopLevelDeclarationProcessor *processor)
 {
+    qDebug() << "SemanticInfoUpdaterPrivate::update";
+
     SemanticInfo newSemanticInfo;
     newSemanticInfo.revision = source.revision;
     newSemanticInfo.snapshot = source.snapshot;
@@ -113,6 +115,8 @@ SemanticInfo SemanticInfoUpdaterPrivate::update(const SemanticInfo::Source &sour
 bool SemanticInfoUpdaterPrivate::reuseCurrentSemanticInfo(const SemanticInfo::Source &source,
                                                           bool emitSignalWhenFinished)
 {
+    qDebug() << "SemanticInfoUpdaterPrivate::reuseCurrentSemanticInfo";
+
     const SemanticInfo currentSemanticInfo = semanticInfo();
 
     if (!source.force

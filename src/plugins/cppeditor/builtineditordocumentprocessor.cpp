@@ -268,6 +268,7 @@ void BuiltinEditorDocumentProcessor::onParserFinished(CPlusPlus::Document::Ptr d
 
 void BuiltinEditorDocumentProcessor::onSemanticInfoUpdated(const SemanticInfo semanticInfo)
 {
+    qDebug() << "BuiltinEditorDocumentProcessor::onSemanticInfoUpdated";
     qCDebug(log) << "semantic info updated"
                  << semanticInfo.doc->filePath() << semanticInfo.revision << semanticInfo.complete;
 

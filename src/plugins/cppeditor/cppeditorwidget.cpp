@@ -448,6 +448,8 @@ void CppEditorWidget::finalizeInitialization()
 
     connect(&d->m_useSelectionsUpdater, &CppUseSelectionsUpdater::finished, this,
             [this] (SemanticInfo::LocalUseMap localUses, bool success) {
+                qDebug() << "CppUseSelectionsUpdater::finished success: " << success;
+
                 if (success) {
                     d->m_lastSemanticInfo.localUsesUpdated = true;
                     d->m_lastSemanticInfo.localUses = localUses;
@@ -1017,12 +1019,22 @@ unsigned CppEditorWidget::documentRevision() const
 
 bool CppEditorWidget::isSemanticInfoValidExceptLocalUses() const
 {
+    qDebug() << "CppEditorWidget::isSemanticInfoValidExceptLocalUses"
+             << " this: " << this
+             << ", d->m_lastSemanticInfo.doc: " << d->m_lastSemanticInfo.doc
+             << ", d->m_lastSemanticInfo.revision: " << d->m_lastSemanticInfo.revision
+             << ", documentRevision(): " << documentRevision()
+             << ", d->m_lastSemanticInfo.snapshot.isEmpty(): " << d->m_lastSemanticInfo.snapshot.isEmpty()
+
+        ;
     return d->m_lastSemanticInfo.doc && d->m_lastSemanticInfo.revision == documentRevision()
            && !d->m_lastSemanticInfo.snapshot.isEmpty();
 }
 
 bool CppEditorWidget::isSemanticInfoValid() const
 {
+    qDebug() << "CppEditorWidget::isSemanticInfoValid d->m_lastSemanticInfo.localUsesUpdated: " << d->m_lastSemanticInfo.localUsesUpdated;
+
     return isSemanticInfoValidExceptLocalUses() && d->m_lastSemanticInfo.localUsesUpdated;
 }
 
@@ -1223,10 +1235,13 @@ void CppEditorWidget::updateSemanticInfo()
 void CppEditorWidget::updateSemanticInfo(const SemanticInfo &semanticInfo,
                                          bool updateUseSelectionSynchronously)
 {
-    if (semanticInfo.revision < documentRevision())
+    if (semanticInfo.revision < documentRevision()) {
+        qDebug() << "CppEditorWidget::updateSemanticInfo semanticInfo.revision: " << semanticInfo.revision << ", documentRevision(): " << documentRevision();
         return;
+    }
 
     d->m_lastSemanticInfo = semanticInfo;
+    qDebug() << "CppEditorWidget::updateSemanticInfo d->m_lastSemanticInfo.doc: " << d->m_lastSemanticInfo.doc << ", d->m_localRenaming.isActive(): " << d->m_localRenaming.isActive();
 
     if (!d->m_localRenaming.isActive()) {
         const CppUseSelectionsUpdater::CallType type = updateUseSelectionSynchronously
@@ -1252,7 +1267,9 @@ bool CppEditorWidget::isOldStyleSignalOrSlot() const
 std::unique_ptr<AssistInterface> CppEditorWidget::createAssistInterface(AssistKind kind,
                                                                         AssistReason reason) const
 {
+    qDebug() << "CppEditorWidget::createAssistInterface1";
     if (kind == Completion || kind == FunctionHint) {
+        qDebug() << "CppEditorWidget::createAssistInterface21";
         CppCompletionAssistProvider * const cap = kind == Completion
                 ? qobject_cast<CppCompletionAssistProvider *>(cppEditorDocument()->completionAssistProvider())
                 : qobject_cast<CppCompletionAssistProvider *>(cppEditorDocument()->functionHintAssistProvider());
@@ -1265,9 +1282,11 @@ std::unique_ptr<AssistInterface> CppEditorWidget::createAssistInterface(AssistKi
             return features;
         };
 
-        if (cap)
+        if (cap) {
+            qDebug() << "CppEditorWidget::createAssistInterface22";
             return cap->createAssistInterface(textDocument()->filePath(), this, getFeatures(), reason);
-        else {
+        } else {
+            qDebug() << "CppEditorWidget::createAssistInterface23";
             if (isOldStyleSignalOrSlot())
                 return CppModelManager::instance()
                     ->completionAssistProvider()
@@ -1275,9 +1294,15 @@ std::unique_ptr<AssistInterface> CppEditorWidget::createAssistInterface(AssistKi
             return TextEditorWidget::createAssistInterface(kind, reason);
         }
     } else if (kind == QuickFix) {
-        if (isSemanticInfoValid())
+        qDebug() << "CppEditorWidget::createAssistInterface31";
+        if (isSemanticInfoValid()) {
+            qDebug() << "CppEditorWidget::createAssistInterface32";
+
             return std::make_unique<CppQuickFixInterface>(const_cast<CppEditorWidget *>(this), reason);
+        }
+
     } else {
+        qDebug() << "CppEditorWidget::createAssistInterface4";
         return TextEditorWidget::createAssistInterface(kind, reason);
     }
     return nullptr;

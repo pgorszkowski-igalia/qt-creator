@@ -30,6 +30,7 @@ CppUseSelectionsUpdater::CppUseSelectionsUpdater(CppEditorWidget *editorWidget)
 
 CppUseSelectionsUpdater::~CppUseSelectionsUpdater()
 {
+    qDebug() << "CppUseSelectionsUpdater::~CppUseSelectionsUpdater";
     if (m_runnerWatcher)
         m_runnerWatcher->cancel();
 }
@@ -59,7 +60,8 @@ CppUseSelectionsUpdater::RunnerInfo CppUseSelectionsUpdater::update(CallType cal
     params.textCursor = Utils::Text::wordStartCursor(cppEditorWidget->textCursor());
 
     if (callType == CallType::Asynchronous) {
-        if (isSameIdentifierAsBefore(params.textCursor))
+        qDebug() << "CppUseSelectionsUpdater::update asynchronous case";
+        if (isSameIdentifierAsBefore(params.textCursor) && m_runnerWatcher && !m_runnerWatcher->isCanceled())
             return RunnerInfo::AlreadyUpToDate;
 
         if (m_runnerWatcher)
@@ -75,6 +77,7 @@ CppUseSelectionsUpdater::RunnerInfo CppUseSelectionsUpdater::update(CallType cal
         m_runnerWatcher->setFuture(cppEditorDocument->cursorInfo(params));
         return RunnerInfo::Started;
     } else { // synchronous case
+        qDebug() << "CppUseSelectionsUpdater::update synchronous case";
         abortSchedule();
 
         const int startRevision = cppEditorDocument->document()->revision();
@@ -126,19 +129,24 @@ void CppUseSelectionsUpdater::onFindUsesFinished()
                emit finished(SemanticInfo::LocalUseMap(), false); return);
 
     if (m_runnerWatcher->isCanceled()) {
+        qDebug() << "CppUseSelectionsUpdater::onFindUsesFinished1";
+
         emit finished(SemanticInfo::LocalUseMap(), false);
         return;
     }
     if (m_runnerRevision != m_editorWidget->document()->revision()) {
+        qDebug() << "CppUseSelectionsUpdater::onFindUsesFinished2";
         emit finished(SemanticInfo::LocalUseMap(), false);
         return;
     }
     if (m_runnerWordStartPosition
             != Utils::Text::wordStartCursor(m_editorWidget->textCursor()).position()) {
+        qDebug() << "CppUseSelectionsUpdater::onFindUsesFinished3";
         emit finished(SemanticInfo::LocalUseMap(), false);
         return;
     }
     if (m_editorWidget->isRenaming()) {
+        qDebug() << "CppUseSelectionsUpdater::onFindUsesFinished4";
         emit finished({}, false);
         return;
     }

@@ -7884,6 +7884,7 @@ void TextEditorWidgetPrivate::collectToCircularClipboard()
 
 void TextEditorWidget::circularPaste()
 {
+    qDebug("TextEditorWidget::circularPaste");
     CircularClipboard *circularClipBoard = CircularClipboard::instance();
     if (const QMimeData *clipboardData = QApplication::clipboard()->mimeData()) {
         circularClipBoard->collect(TextEditorWidget::duplicateMimeData(clipboardData));
@@ -7891,6 +7892,7 @@ void TextEditorWidget::circularPaste()
     }
 
     if (circularClipBoard->size() > 1) {
+        qDebug("TextEditorWidget::circularPaste circularClipBoard->size() > 1\n");
         invokeAssist(QuickFix, d->m_clipboardAssistProvider.data());
         return;
     }
@@ -8726,6 +8728,7 @@ QTextBlock TextEditorWidget::blockForVerticalOffset(int offset) const
 
 void TextEditorWidget::invokeAssist(AssistKind kind, IAssistProvider *provider)
 {
+    qDebug() << "TextEditorWidget::invokeAssist";
     if (multiTextCursor().hasMultipleCursors())
         return;
 
@@ -8742,6 +8745,7 @@ void TextEditorWidget::invokeAssist(AssistKind kind, IAssistProvider *provider)
 std::unique_ptr<AssistInterface> TextEditorWidget::createAssistInterface(AssistKind kind,
                                                                          AssistReason reason) const
 {
+    qDebug() << "TextEditorWidget::createAssistInterface";
     Q_UNUSED(kind)
     return std::make_unique<AssistInterface>(textCursor(), d->m_document->filePath(), reason);
 }
